@@ -1,0 +1,9 @@
+{
+  "robust_model": "XGBoost",
+  "training_samples_original": 35801,
+  "training_samples_augmented": 214806,
+  "training_time_s": 5.2918829917907715,
+  "clean_accuracy_baseline": 0.9690305206463196,
+  "clean_accuracy_robust": 0.967833632555356,
+  "clean_tradeoff": -0.0011968880909635216
+}
