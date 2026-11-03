@@ -1,0 +1,11 @@
+fastapi
+httpx
+jupyter
+matplotlib
+numpy
+pandas
+pytest
+scikit-learn
+seaborn
+streamlit
+uvicorn[standard]
