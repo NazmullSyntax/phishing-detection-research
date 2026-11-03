@@ -23,6 +23,7 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/processed/README.md
 
 # Results (regenerable)
 results/figures/*.png
