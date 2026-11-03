@@ -1,0 +1,92 @@
+{
+  "character_substitution": {
+    "sample_original": [
+      "http://12-land.co.jp/gyukmx",
+      "https://www.bleacherreport.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top/AU/page1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu/page1.php",
+      "https://www.mp3raid.com/music/kanye_west_love_lockdown.html"
+    ],
+    "sample_attacked": [
+      "http://12-1and.co.jp/gyukmx",
+      "https://www.b1eacherr3port.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aues3aca3mceoy.bayvlb.top/AU/page1.php",
+      "http://www.v1vcsiavcai.vicsvesa1.0bj313.1cu/page1.php",
+      "https://www.mp3ra1d.c0m/music/kanye_west_love_lockdown.html"
+    ],
+    "total_attacked": 6684,
+    "n_flipped": 125
+  },
+  "subdomain_manipulation": {
+    "sample_original": [
+      "http://12-land.co.jp/gyukmx",
+      "https://www.bleacherreport.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top/AU/page1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu/page1.php",
+      "https://www.mp3raid.com/music/kanye_west_love_lockdown.html"
+    ],
+    "sample_attacked": [
+      "http://12-land.co.jp.signin-portal.xyz/gyukmx",
+      "https://www.bleacherreport.com.account-verify.xyz/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top.secure-login.xyz/AU/page1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu.account-verify.xyz/page1.php",
+      "https://www.mp3raid.com.account-verify.xyz/music/kanye_west_love_lockdown.html"
+    ],
+    "total_attacked": 6684,
+    "n_flipped": 3490
+  },
+  "unicode_homograph": {
+    "sample_original": [
+      "http://12-land.co.jp/gyukmx",
+      "https://www.bleacherreport.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top/AU/page1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu/page1.php",
+      "https://www.mp3raid.com/music/kanye_west_love_lockdown.html"
+    ],
+    "sample_attacked": [
+      "http://12-land.co.jр/gyukmx",
+      "https://www.blеachеrreport.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-pасcoy.aueseacaemceoy.bayvlb.top/AU/page1.php",
+      "http://www.vіvcsіavcai.vicsvesai.0bj313.icu/page1.php",
+      "https://www.mр3rаid.com/music/kanye_west_love_lockdown.html"
+    ],
+    "total_attacked": 6684,
+    "n_flipped": 15
+  },
+  "url_encoding": {
+    "sample_original": [
+      "http://12-land.co.jp/gyukmx",
+      "https://www.bleacherreport.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top/AU/page1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu/page1.php",
+      "https://www.mp3raid.com/music/kanye_west_love_lockdown.html"
+    ],
+    "sample_attacked": [
+      "http://12-land.co.jp/gyu%6Bmx",
+      "https://www.bleacherreport.com/%61rt%69cles/%39%32346%31-tw%6F-sh%65%64-rev%69e%77-%6Eo-e%73%63%61p%65-%66or-r%6Fde%72ing-stong-el-gen%65%72ic%6F-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top/AU/%70%61ge1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu/%70age1.%70%68p",
+      "https://www.mp3raid.com/%6D%75s%69%63/kany%65_w%65%73%74_%6Cove_l%6Fckdow%6E.htm%6C"
+    ],
+    "total_attacked": 6684,
+    "n_flipped": 107
+  },
+  "url_shortening": {
+    "sample_original": [
+      "http://12-land.co.jp/gyukmx",
+      "https://www.bleacherreport.com/articles/923461-two-shed-review-no-escape-for-rodering-stong-el-generico-in-roh",
+      "http://www.au-paccoy.aueseacaemceoy.bayvlb.top/AU/page1.php",
+      "http://www.vivcsiavcai.vicsvesai.0bj313.icu/page1.php",
+      "https://www.mp3raid.com/music/kanye_west_love_lockdown.html"
+    ],
+    "sample_attacked": [
+      "https://buff.ly/1pjso2k",
+      "https://tinyurl.com/u2ce1rn",
+      "https://bit.ly/dmg34jh",
+      "https://shorturl.at/ve6ruv6",
+      "https://shorturl.at/kzrdatk"
+    ],
+    "total_attacked": 6684,
+    "n_flipped": 3674
+  }
+}

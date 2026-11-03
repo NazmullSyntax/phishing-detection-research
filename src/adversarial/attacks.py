@@ -5,8 +5,7 @@ All attacks are pure string transformations — no network access, no URL visiti
 Preserves label integrity: legitimate stays legitimate, phishing stays phishing.
 """
 import random
-import re
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse
 
 # Unicode homograph mapping (Latin → visually similar Unicode)
 HOMOGRAPH_MAP = {
@@ -25,7 +24,7 @@ CHAR_SUBS = {
     "l": "1",  # ell → one
     "o": "0",  # o → zero
     "i": "1",  # i → one
-    "e": "3",  # e → three (aggressive)
+    "e": "3",  # e → three
 }
 
 SHORT_URL_DOMAINS = [
@@ -39,28 +38,26 @@ MISLEADING_SUBDOMAIN_SUFFIXES = [
 ]
 
 
-def attack_character_substitution(url: str, max_chars: int = 3) -> str:
+def attack_character_substitution(url: str, max_chars: int = 3, seed: int = 0) -> str:
     """Replace up to N visually-similar chars in domain with lookalikes."""
     try:
+        rng = random.Random(seed)
         parsed = urlparse(url)
         netloc = parsed.netloc
         if not netloc or netloc.replace(".", "").replace(":", "").isdigit():
-            # Skip IP-based URLs (attack not meaningful)
             return url
 
-        # Only substitute in domain (not path/query, keeps semantics)
         chars = list(netloc)
         substitutions = 0
         for i, ch in enumerate(chars):
             if substitutions >= max_chars:
                 break
-            if ch.lower() in CHAR_SUBS and random.random() < 0.3:
+            if ch.lower() in CHAR_SUBS and rng.random() < 0.3:
                 chars[i] = CHAR_SUBS[ch.lower()]
                 substitutions += 1
 
         new_netloc = "".join(chars)
         if new_netloc == netloc:
-            # Force at least one substitution
             for i, ch in enumerate(chars):
                 if ch.lower() in CHAR_SUBS:
                     chars[i] = CHAR_SUBS[ch.lower()]
@@ -86,9 +83,10 @@ def attack_subdomain_manipulation(url: str, seed: int = 0) -> str:
         return url
 
 
-def attack_unicode_homograph(url: str, max_chars: int = 2) -> str:
+def attack_unicode_homograph(url: str, max_chars: int = 2, seed: int = 0) -> str:
     """Replace Latin chars in domain with visually-identical Unicode."""
     try:
+        rng = random.Random(seed)
         parsed = urlparse(url)
         netloc = parsed.netloc
         if not netloc or netloc.replace(".", "").replace(":", "").isdigit():
@@ -99,7 +97,7 @@ def attack_unicode_homograph(url: str, max_chars: int = 2) -> str:
         for i, ch in enumerate(chars):
             if substitutions >= max_chars:
                 break
-            if ch.lower() in HOMOGRAPH_MAP and random.random() < 0.4:
+            if ch.lower() in HOMOGRAPH_MAP and rng.random() < 0.4:
                 chars[i] = HOMOGRAPH_MAP[ch.lower()]
                 substitutions += 1
 
@@ -121,7 +119,6 @@ def attack_url_encoding(url: str, encode_ratio: float = 0.3, seed: int = 0) -> s
     try:
         rng = random.Random(seed)
         parsed = urlparse(url)
-        # Encode only alphanumerics in path (leave structure)
         path = parsed.path
         if not path:
             return url
@@ -156,7 +153,6 @@ ATTACKS = {
 
 
 if __name__ == "__main__":
-    # Quick demo
     sample_phishing = "http://paypal.com.verify-login.xyz/account/update"
     sample_legit = "https://www.google.com/search?q=test"
 
@@ -166,6 +162,15 @@ if __name__ == "__main__":
     for name, attack_fn in ATTACKS.items():
         print(f"\n[{name}]")
         print(f"  Original (phish): {sample_phishing}")
-        print(f"  Attacked:         {attack_fn(sample_phishing, seed=42)}")
+        try:
+            attacked_phish = attack_fn(sample_phishing, seed=42)
+        except TypeError:
+            attacked_phish = attack_fn(sample_phishing)
+        print(f"  Attacked:         {attacked_phish}")
+
         print(f"  Original (legit): {sample_legit}")
-        print(f"  Attacked:         {attack_fn(sample_legit, seed=42)}")
+        try:
+            attacked_legit = attack_fn(sample_legit, seed=42)
+        except TypeError:
+            attacked_legit = attack_fn(sample_legit)
+        print(f"  Attacked:         {attacked_legit}")

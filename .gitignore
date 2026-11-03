@@ -48,3 +48,7 @@ models/
 
 # Experiments (large outputs)
 experiments/baseline/best_model_metadata.json
+# Keep robustness experiment results (needed for thesis)
+!experiments/robustness/attack_results.csv
+!experiments/robustness/attack_details.json
+
