@@ -2,7 +2,7 @@
   "robust_model": "XGBoost",
   "training_samples_original": 35801,
   "training_samples_augmented": 214806,
-  "training_time_s": 5.207876205444336,
+  "training_time_s": 6.418886661529541,
   "clean_accuracy_baseline": 0.973967684021544,
   "clean_accuracy_robust": 0.9730700179533214,
   "clean_tradeoff": -0.0008976660682226134
