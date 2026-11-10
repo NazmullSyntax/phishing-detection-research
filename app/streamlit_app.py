@@ -1,8 +1,6 @@
 """
-Day 9: Streamlit UI for phishing URL detection.
-Calls FastAPI backend at http://127.0.0.1:8000/predict.
+Streamlit UI v2: shows prediction, confidence, risk level, threshold, feature explanation.
 """
-import time
 import requests
 import streamlit as st
 import pandas as pd
@@ -11,64 +9,53 @@ from datetime import datetime
 API_URL = "http://127.0.0.1:8000"
 
 st.set_page_config(
-    page_title="Phishing URL Detector",
+    page_title="Phishing URL Detector v2",
     page_icon="🛡️",
     layout="wide",
-    initial_sidebar_state="expanded",
 )
 
-# ---------- Header ----------
 st.title("🛡️ Phishing URL Detector")
-st.markdown(
-    "Analyze a URL using a **robust XGBoost model** trained against adversarial attacks."
-)
+st.markdown("Analyze a URL using a **robust XGBoost model** with tuned threshold.")
 
-# ---------- Sidebar ----------
+# Sidebar
 with st.sidebar:
-    st.header("About")
-    st.markdown(
-        """
-        This application is part of a research project:
-
-        **Adversarially Robust and Deployment-Ready Phishing URL Detection**
-
-        **Model:** XGBoost (adversarial training)
-        **Clean Test Accuracy:** 96.78%
-        **Subdomain Attack Accuracy:** 96.56%
-
-        **API Endpoint:** `POST /predict`
-        """
-    )
-    st.divider()
-    st.caption(f"Session started: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-
-    # Check API health
+    st.header("Model Info")
     try:
         health = requests.get(f"{API_URL}/health", timeout=2).json()
         if health.get("model_loaded"):
-            st.success("✅ API healthy")
+            st.success(f"API healthy")
+            st.json({
+                "model": health.get("model_version"),
+                "threshold": health.get("threshold"),
+            })
         else:
-            st.error("❌ API unhealthy")
+            st.error("API unhealthy")
     except Exception:
-        st.error("❌ API unreachable")
+        st.error("API unreachable")
 
-# ---------- Session state ----------
+    st.divider()
+    st.caption(
+        "This tool is for **research/educational purposes** only. "
+        "Model confidence is not a security guarantee."
+    )
+    st.caption(f"Session: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+
+# Session state for history
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# ---------- Input ----------
+# Input
 st.subheader("Enter URL to Analyze")
 url = st.text_input(
     "URL",
-    placeholder="e.g., https://www.google.com or http://paypal.verify-login.xyz/account",
+    placeholder="e.g., https://accounts.google.com or http://paypal.verify-login.xyz",
     label_visibility="collapsed",
 )
 
-col1, col2 = st.columns([1, 3])
+col1, col2 = st.columns([1, 4])
 with col1:
     analyze = st.button("🔍 Analyze", type="primary", use_container_width=True)
 
-# ---------- Analyze ----------
 if analyze and url.strip():
     with st.spinner("Analyzing..."):
         try:
@@ -84,31 +71,32 @@ if analyze and url.strip():
                 # Add to history
                 st.session_state.history.insert(0, {
                     "time": datetime.now().strftime("%H:%M:%S"),
-                    "url": url.strip(),
+                    "url": url.strip()[:60],
                     "prediction": result["prediction"],
-                    "confidence": result["confidence"],
+                    "confidence": f"{result['confidence']*100:.1f}%",
+                    "risk": result["risk_level"],
                 })
                 st.session_state.history = st.session_state.history[:10]
 
-                # ---------- Result card ----------
+                # Result display
                 st.divider()
                 st.subheader("Result")
 
                 col_a, col_b = st.columns([1, 1])
                 with col_a:
                     if result["prediction"] == "phishing":
-                        st.error(f"### 🚨 {result['prediction'].upper()}")
+                        st.error(f"### 🚨 PHISHING")
+                    elif result["prediction"] == "uncertain":
+                        st.warning(f"### ⚠️ UNCERTAIN")
                     else:
-                        st.success(f"### ✅ {result['prediction'].upper()}")
+                        st.success(f"### ✅ LEGITIMATE")
+
+                    st.caption(f"Risk Level: **{result['risk_level'].upper()}**")
 
                 with col_b:
-                    st.metric(
-                        "Confidence",
-                        f"{result['confidence']*100:.1f}%",
-                        help="Model's confidence in its prediction (not a security guarantee)"
-                    )
+                    st.metric("Confidence", f"{result['confidence']*100:.1f}%")
 
-                # ---------- Probability bar ----------
+                # Probabilities
                 st.markdown("**Probability Breakdown**")
                 col_p, col_l = st.columns(2)
                 with col_p:
@@ -118,29 +106,27 @@ if analyze and url.strip():
 
                 st.progress(result["phishing_probability"])
 
-                # ---------- Details ----------
+                # Details
                 st.divider()
                 st.subheader("Details")
-                col1, col2, col3 = st.columns(3)
+                col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("Latency", f"{result['latency_ms']:.2f} ms")
                 with col2:
-                    st.metric("Model", result["model_version"])
+                    st.metric("Threshold", f"{result['threshold_used']:.2f}" if result['threshold_used'] else "N/A")
                 with col3:
+                    st.metric("Model", result["model_version"].split("+")[0])
+                with col4:
                     st.metric("URL Length", len(result["url"]))
 
-                # ---------- Warnings ----------
-                if result["confidence"] < 0.7:
-                    st.warning(
-                        "⚠️ Low confidence — treat this prediction with caution. "
-                        "Model confidence is not a guarantee of security."
-                    )
-
-                if len(url) < 30:
+                # Warnings
+                if result["prediction"] == "uncertain":
                     st.info(
-                        "ℹ️ Short URLs (e.g., shortened URLs) are harder to classify. "
-                        "See the project thesis (Section 5) for details."
+                        "⚠️ **Uncertain prediction** — the model's confidence is in the "
+                        "borderline range. Treat this as low-confidence; manually verify."
                     )
+                if "whitelist" in result["model_version"]:
+                    st.info("✅ This domain is on the **trusted list**. ML prediction was skipped.")
 
             elif response.status_code == 400:
                 st.error(f"❌ Invalid input: {response.json().get('detail', 'Unknown error')}")
@@ -149,29 +135,23 @@ if analyze and url.strip():
 
         except requests.exceptions.RequestException as e:
             st.error(f"❌ Could not reach API: {e}")
-            st.info("💡 Make sure the FastAPI server is running at `http://127.0.0.1:8000`")
+            st.info("Make sure FastAPI is running at `http://127.0.0.1:8000`")
 
 elif analyze:
     st.warning("Please enter a URL first.")
 
-# ---------- History ----------
+# History
 if st.session_state.history:
     st.divider()
     st.subheader("Recent Analyses")
-    history_df = pd.DataFrame(st.session_state.history)
-    st.dataframe(
-        history_df,
-        use_container_width=True,
-        hide_index=True,
-    )
+    st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True, hide_index=True)
     if st.button("Clear History"):
         st.session_state.history = []
         st.rerun()
 
-# ---------- Footer ----------
+# Footer
 st.divider()
 st.caption(
-    "⚠️ **Disclaimer:** This tool is for research and educational purposes only. "
-    "Model confidence is not a guarantee of URL safety. Always verify URLs through "
-    "official channels before interacting with them."
+    "⚠️ **Disclaimer:** For research/educational use only. "
+    "Model confidence is not a guarantee of URL safety."
 )
