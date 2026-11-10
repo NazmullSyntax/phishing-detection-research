@@ -1,0 +1,11 @@
+{
+  "optimal_threshold": 0.85,
+  "selection_criterion": "Recall >= 92%, minimize FPR",
+  "validation_metrics": {
+    "accuracy": 0.964337990685296,
+    "precision": 0.9966268015946029,
+    "recall": 0.9267179925862561,
+    "f1": 0.9604018912529552,
+    "fpr": 0.0027445109780439123
+  }
+}
