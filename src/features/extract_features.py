@@ -1,6 +1,5 @@
 """
 Day 4 + Fix v2: URL Feature Extraction.
-
 Extracts 26 lexical features from URL strings (no network access).
 Version 2: Reduced keyword aggressiveness, added TLD + port signals.
 """
@@ -11,7 +10,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 import pandas as pd
 
-# Suspicious keywords (kept, but used with normalization)
+# Suspicious keywords
 SUSPICIOUS_KEYWORDS = [
     "login", "verify", "secure", "account", "update", "confirm",
     "signin", "bank", "paypal", "amazon", "apple", "microsoft",
@@ -19,7 +18,7 @@ SUSPICIOUS_KEYWORDS = [
     "suspended", "locked", "unlock", "recovery", "support",
 ]
 
-# TLDs associated with phishing (cheap/free registrations)
+# TLDs associated with phishing
 SUSPICIOUS_TLDS = {
     "xyz", "top", "club", "online", "site", "website", "space",
     "live", "icu", "buzz", "monster", "quest", "cyou", "sbs",
@@ -31,7 +30,7 @@ TRUSTED_TLDS = {
     "com", "org", "edu", "gov", "net", "io", "co", "us", "uk",
 }
 
-# Suspicious file extensions in path
+# Suspicious file extensions
 SUSPICIOUS_EXTENSIONS = {".php", ".exe", ".bat", ".cmd", ".scr", ".vbs", ".js"}
 
 
@@ -112,10 +111,19 @@ def extract_features(url: str) -> dict:
         parsed = urlparse("")
 
     netloc = parsed.netloc.lower().split(":")[0]
+    
+    # নতুন লজিক: www. বাদ দিয়ে মূল ডোমেইন বের করা
+    domain = netloc
+    if domain.startswith("www."):
+        domain = domain[4:]
+        
+    parts = domain.split(".")
+    tld = parts[-1] if len(parts) >= 2 else ""
+    num_subdomains = max(0, len(parts) - 2)
+
     path = parsed.path
     query = parsed.query
     fragment = parsed.fragment
-    tld = extract_tld(url)
 
     kw_count = count_suspicious_keywords(url)
     url_len = max(1, len(url))
@@ -140,7 +148,7 @@ def extract_features(url: str) -> dict:
         "num_percent_encoding": len(re.findall(r"%[0-9A-Fa-f]{2}", url)),
 
         # C. Structural (8)
-        "num_subdomains": count_subdomains(url),
+        "num_subdomains": num_subdomains,
         "has_https": int(url.lower().startswith("https://")),
         "has_ip_address": has_ip_address(url),
         "has_at_symbol": int("@" in url),
@@ -167,32 +175,23 @@ def extract_dataframe(df: pd.DataFrame, url_col: str = "url") -> pd.DataFrame:
 
 
 def main():
-    """Re-extract features for all splits (train, val, test)."""
     print("=" * 60)
-    print("DAY 4: FEATURE EXTRACTION (v2 - 26 features)")
+    print("FEATURE EXTRACTION (v2)")
     print("=" * 60)
-
     splits = {
         "train": "data/processed/train.csv",
         "val": "data/processed/val.csv",
         "test": "data/processed/test.csv",
     }
     out_dir = Path("data/processed")
-
     for name, path in splits.items():
         print(f"\n[{name}] loading {path}")
         df = pd.read_csv(path)
-        print(f"    rows: {len(df):,}")
-
         features_df = extract_dataframe(df)
         out_path = out_dir / f"{name}_features.csv"
         features_df.to_csv(out_path, index=False)
-        print(f"    -> saved {out_path} ({features_df.shape[0]:,} rows x {features_df.shape[1]} cols)")
-        print(f"    feature count: {features_df.shape[1] - 2}")  # minus label + domain
-
-    print("\n" + "=" * 60)
-    print("DONE — feature extraction complete")
-    print("=" * 60)
+        print(f"    -> saved {out_path} ({features_df.shape[0]:,} rows)")
+    print("\nDONE")
 
 
 if __name__ == "__main__":
