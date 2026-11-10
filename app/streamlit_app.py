@@ -113,7 +113,8 @@ if analyze and url.strip():
                 with col1:
                     st.metric("Latency", f"{result['latency_ms']:.2f} ms")
                 with col2:
-                    st.metric("Threshold", f"{result['threshold_used']:.2f}" if result['threshold_used'] else "N/A")
+                    thresh_display = f"{result['threshold_used']*100:.0f}%" if result['threshold_used'] else "N/A"
+                    st.metric("Threshold (Alert if >)", thresh_display)
                 with col3:
                     st.metric("Model", result["model_version"].split("+")[0])
                 with col4:

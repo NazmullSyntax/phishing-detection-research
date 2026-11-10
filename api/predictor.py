@@ -34,7 +34,7 @@ if THRESHOLD_PATH.exists():
         THRESHOLD_DATA = json.load(_t)
     PHISHING_THRESHOLD = THRESHOLD_DATA["optimal_threshold"]
 else:
-    PHISHING_THRESHOLD = 0.85  # fallback
+        PHISHING_THRESHOLD = 0.92  # fallback # fallback
 
 # Uncertain zone: probabilities in this range are "uncertain"
 UNCERTAIN_LOW = 0.35
