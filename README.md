@@ -50,3 +50,15 @@ This thesis answers both questions with:
 ---
 
 ## 🏗️ Project Structure
+
+thesis/
+├── README.md           ← Master index + abstract
+├── chapter_1.md        ← Introduction (RQ, objectives)
+├── chapter_2.md        ← Literature Review (⚠️ needs real citations)
+├── chapter_3.md        ← Methodology (dataset, features, attacks)
+├── chapter_4.md        ← ML Model Development (5 models compared)
+├── chapter_5.md        ← Adversarial Robustness (MAIN contribution)
+├── chapter_6.md        ← Deployment (2nd contribution)
+├── chapter_7.md        ← Conclusion + Future Work
+├── references.bib      ← BibTeX citations
+└── presentation.md     ← (future) Slide outline
