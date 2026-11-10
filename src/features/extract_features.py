@@ -1,12 +1,13 @@
 """
 Day 4 + Fix v2: URL Feature Extraction.
 
-Extracts 23 lexical features from URL strings (no network access).
+Extracts 26 lexical features from URL strings (no network access).
 Version 2: Reduced keyword aggressiveness, added TLD + port signals.
 """
 import math
 import re
 from collections import Counter
+from pathlib import Path
 from urllib.parse import urlparse
 import pandas as pd
 
@@ -25,7 +26,7 @@ SUSPICIOUS_TLDS = {
     "click", "link", "gq", "tk", "ml", "ga", "cf", "work", "party",
 }
 
-# Trusted TLDs (established legitimate spaces)
+# Trusted TLDs
 TRUSTED_TLDS = {
     "com", "org", "edu", "gov", "net", "io", "co", "us", "uk",
 }
@@ -78,7 +79,6 @@ def has_ip_address(url: str) -> int:
 
 
 def has_custom_port(url: str) -> int:
-    """Check for unusual port (not 80, 443, 8080)."""
     try:
         netloc = urlparse(url).netloc
         if ":" in netloc:
@@ -104,7 +104,7 @@ def path_has_suspicious_ext(url: str) -> int:
 
 
 def extract_features(url: str) -> dict:
-    """Extract 23 lexical features from a URL string."""
+    """Extract 26 lexical features from a URL string."""
     url = str(url).strip()
     try:
         parsed = urlparse(url)
@@ -117,7 +117,6 @@ def extract_features(url: str) -> dict:
     fragment = parsed.fragment
     tld = extract_tld(url)
 
-    # Keyword density (normalized)
     kw_count = count_suspicious_keywords(url)
     url_len = max(1, len(url))
     keyword_density = kw_count / (url_len / 10.0)
@@ -140,7 +139,7 @@ def extract_features(url: str) -> dict:
         "num_uppercase": sum(c.isupper() for c in url),
         "num_percent_encoding": len(re.findall(r"%[0-9A-Fa-f]{2}", url)),
 
-        # C. Structural (6 + 2 new = 8)
+        # C. Structural (8)
         "num_subdomains": count_subdomains(url),
         "has_https": int(url.lower().startswith("https://")),
         "has_ip_address": has_ip_address(url),
@@ -150,12 +149,12 @@ def extract_features(url: str) -> dict:
         "has_custom_port": has_custom_port(url),
         "path_has_suspicious_ext": path_has_suspicious_ext(url),
 
-        # D. Content & TLD (2 + 3 new = 5)
-        "keyword_density": round(keyword_density, 4),  # NEW: normalized
+        # D. Content & TLD (5)
+        "keyword_density": round(keyword_density, 4),
         "entropy": shannon_entropy(url),
-        "suspicious_tld": int(tld in SUSPICIOUS_TLDS),  # NEW
-        "trusted_tld": int(tld in TRUSTED_TLDS),         # NEW
-        "has_suspicious_keyword": int(kw_count > 0),     # NEW: binary (not count)
+        "suspicious_tld": int(tld in SUSPICIOUS_TLDS),
+        "trusted_tld": int(tld in TRUSTED_TLDS),
+        "has_suspicious_keyword": int(kw_count > 0),
     }
     return features
 
@@ -167,8 +166,34 @@ def extract_dataframe(df: pd.DataFrame, url_col: str = "url") -> pd.DataFrame:
     return pd.concat([df[keep_cols].reset_index(drop=True), features_df], axis=1)
 
 
+def main():
+    """Re-extract features for all splits (train, val, test)."""
+    print("=" * 60)
+    print("DAY 4: FEATURE EXTRACTION (v2 - 26 features)")
+    print("=" * 60)
+
+    splits = {
+        "train": "data/processed/train.csv",
+        "val": "data/processed/val.csv",
+        "test": "data/processed/test.csv",
+    }
+    out_dir = Path("data/processed")
+
+    for name, path in splits.items():
+        print(f"\n[{name}] loading {path}")
+        df = pd.read_csv(path)
+        print(f"    rows: {len(df):,}")
+
+        features_df = extract_dataframe(df)
+        out_path = out_dir / f"{name}_features.csv"
+        features_df.to_csv(out_path, index=False)
+        print(f"    -> saved {out_path} ({features_df.shape[0]:,} rows x {features_df.shape[1]} cols)")
+        print(f"    feature count: {features_df.shape[1] - 2}")  # minus label + domain
+
+    print("\n" + "=" * 60)
+    print("DONE — feature extraction complete")
+    print("=" * 60)
+
+
 if __name__ == "__main__":
-    sample = "https://accounts.google.com/"
-    print("Sample features:")
-    for k, v in extract_features(sample).items():
-        print(f"  {k}: {v}")
+    main()
